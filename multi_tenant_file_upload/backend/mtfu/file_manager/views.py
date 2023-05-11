@@ -5,7 +5,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 import boto3
 from django.conf import settings
-import uuid
 from botocore.exceptions import ClientError
 from mtfu.file_manager.models import File
 import datetime
@@ -36,7 +35,7 @@ class UploadView(APIView):
         user = request.user
 
         file_location = f"{settings.ASSET_IMAGE_FOLDER}/{user.username}/{filename}"
-        
+
         try:
             s3_client.upload_fileobj(
                 upload_file,
@@ -44,6 +43,7 @@ class UploadView(APIView):
                 file_location,
             )
         except ClientError as e:
+            print(e)
             return
 
         tomorrow = datetime.datetime.now() + datetime.timedelta(days=1)

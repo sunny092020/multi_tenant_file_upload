@@ -9,7 +9,7 @@ django.setup()
 from rest_framework.test import APIClient
 from mtfu.auth_user.models import Tenant
 from mtfu.file_manager.models import File
-import datetime
+
 
 @pytest.fixture
 def api_client():

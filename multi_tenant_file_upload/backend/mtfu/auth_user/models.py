@@ -34,8 +34,9 @@ class Tenant(AbstractBaseUser):
                 Key=f"{settings.ASSET_IMAGE_FOLDER}/{username}/",
             )
         except ClientError as e:
+            print(e)
             return None
-        
+
         tenant = cls(username=username)
         tenant.set_password(password)
         tenant.save()
