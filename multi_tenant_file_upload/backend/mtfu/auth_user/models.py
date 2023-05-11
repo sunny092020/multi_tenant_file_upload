@@ -15,3 +15,10 @@ class Tenant(AbstractBaseUser):
     class Meta:
         managed = True
         unique_together = (("username",),)
+
+    @classmethod
+    def create(cls, username, password):
+        tenant = cls(username=username)
+        tenant.set_password(password)
+        tenant.save()
+        return tenant

@@ -14,14 +14,10 @@ import datetime
 @pytest.fixture
 def api_client():
     # Create a test user
-    user = Tenant(
-        username="john1",
-    )
-    user.set_password("mypassword")
-    user.save()
+    user = Tenant.create("john1", "mypassword")
 
     token_data = {
-        "username": "john1",
+        "username": user.username,
         "password": "mypassword",
     }
     token_response = APIClient().post("/api/token/", data=token_data)
