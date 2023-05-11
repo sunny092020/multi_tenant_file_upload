@@ -31,7 +31,7 @@ class Tenant(AbstractBaseUser):
         try:
             s3_client.put_object(
                 Bucket=settings.AWS_STORAGE_BUCKET_NAME,
-                Key=settings.ASSET_IMAGE_FOLDER + "/" + username + "/",
+                Key=f"{settings.ASSET_IMAGE_FOLDER}/{username}/",
             )
         except ClientError as e:
             return
