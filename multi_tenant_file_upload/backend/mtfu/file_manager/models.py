@@ -11,3 +11,7 @@ class File(models.Model):
     resource = models.CharField(max_length=100, blank=True, null=True)
     resource_id = models.IntegerField(blank=True, null=True)
     delete_flg = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = "file"
+        unique_together = ("tenant", "name", "resource", "resource_id")
