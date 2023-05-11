@@ -31,17 +31,20 @@ class UploadView(APIView):
             aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
             region_name=settings.AWS_S3_REGION_NAME,
         )
+
+        # get user from session
+        user = request.user
+
+        file_location = f"{settings.ASSET_IMAGE_FOLDER}/{user.username}/{filename}"
+        
         try:
             s3_client.upload_fileobj(
                 upload_file,
                 settings.AWS_STORAGE_BUCKET_NAME,
-                settings.ASSET_IMAGE_FOLDER + "/" + filename,
+                file_location,
             )
         except ClientError as e:
             return
-
-        # get user from session
-        user = request.user
 
         tomorrow = datetime.datetime.now() + datetime.timedelta(days=1)
 
@@ -50,7 +53,7 @@ class UploadView(APIView):
             resource=resource,
             resource_id=resource_id,
             tenant=user,
-            location=settings.ASSET_IMAGE_FOLDER + "/" + filename,
+            location=file_location,
             expire_at=tomorrow,
         )
         file.save()
