@@ -63,7 +63,7 @@ def test_upload_tmp_files(tmp_files, api_client):
         file_name = os.path.basename(file_path)
         assert File.objects.filter(name=file_name).exists()
 
-    # verify files/<str:resource>/<str:resourceId> endpoint
+    # verify GET files/<str:resource>/<str:resourceId> endpoint
     response = api_client.get("/api/files/product/1")
     assert response.status_code == 200
 
@@ -77,6 +77,33 @@ def test_upload_tmp_files(tmp_files, api_client):
     assert response_files[0]["location"] == "asset_imgs/john1/test_file_0.txt"
     assert response_files[1]["location"] == "asset_imgs/john1/test_file_1.txt"
     assert response_files[2]["location"] == "asset_imgs/john1/test_file_2.txt"
+
+    # verify file records are not deleted
+    assert (
+        File.objects.filter(
+            delete_flg=False,
+        ).count()
+        == 3
+    )
+
+    # verify DELETE files/<str:resource>/<str:resourceId> endpoint
+    response = api_client.delete("/api/files/product/1")
+    assert response.status_code == 200
+
+    # verify file records are deleted
+    assert (
+        File.objects.filter(
+            delete_flg=False,
+        ).count()
+        == 0
+    )
+
+    # verify GET files/<str:resource>/<str:resourceId> endpoint after delete
+    response = api_client.get("/api/files/product/1")
+    assert response.status_code == 200
+
+    response_files = response.data["files"]
+    assert len(response_files) == 0
 
 
 def test_upload_with_authorized_user(api_client):

@@ -83,3 +83,16 @@ class FileView(APIView):
             )
 
         return Response({"files": file_list})
+
+    @transaction.atomic
+    def delete(self, request, resource, resourceId):
+        # get user from session
+        user = request.user
+
+        files = File.objects.filter(tenant=user, resource=resource, resource_id=resourceId, delete_flg=False)
+
+        for file in files:
+            file.delete_flg = True
+            file.save()
+
+        return Response({"message": "File deleted successfully"})
