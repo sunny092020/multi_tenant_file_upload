@@ -49,7 +49,11 @@ class UploadView(APIView):
             print(e)
             return
 
-        tomorrow = datetime.datetime.now() + datetime.timedelta(days=1)
+        # Get the current time with timezone
+        now = timezone.now()
+
+        # Calculate tomorrow's date
+        tomorrow = now.date() + timezone.timedelta(days=1)
 
         file = File(
             name=filename,
