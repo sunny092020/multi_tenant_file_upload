@@ -257,4 +257,4 @@ def test_list_files(john_client, jimmy_client, tmp_file):
     response = john_client.post("/api/files")
     response_files = response.data["files"]
 
-    assert len(response_files) == 4
+    assert len(response_files) == 2

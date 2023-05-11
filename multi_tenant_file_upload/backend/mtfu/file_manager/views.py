@@ -10,6 +10,7 @@ from mtfu.file_manager.models import File
 import datetime
 from django.db import transaction
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.db.models import Q
 
 
 class UploadView(APIView):
@@ -70,7 +71,9 @@ class FileView(APIView):
         # get user from session
         user = request.user
 
-        files = File.objects.filter(tenant=user, resource=resource, resource_id=resourceId, delete_flg=False)
+        files = File.objects.filter(
+            Q(tenant=user) | Q(is_public=True), resource=resource, resource_id=resourceId, delete_flg=False
+        )
 
         data = paginate_files(request, files)
         return Response(data)
@@ -94,7 +97,9 @@ class ListFilesView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        files = File.objects.filter(delete_flg=False)
+        # get user from session
+        user = request.user
+        files = File.objects.filter(Q(tenant=user) | Q(is_public=True), delete_flg=False)
 
         if "tenant_username" in request.POST:
             tenant_username = request.POST["tenant_username"]
