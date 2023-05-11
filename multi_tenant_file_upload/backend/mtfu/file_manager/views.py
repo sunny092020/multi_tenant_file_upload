@@ -128,6 +128,8 @@ def paginate_files(request, files):
     page_number = request.GET.get("page", 1)
     page_size = request.GET.get("page_size", 10)
 
+    files = files.order_by("name")
+
     paginator = Paginator(files, page_size)
     try:
         file_list = paginator.page(page_number)
