@@ -10,3 +10,4 @@ class File(models.Model):
     is_public = models.BooleanField(default=False)
     resource = models.CharField(max_length=100, blank=True, null=True)
     resource_id = models.IntegerField(blank=True, null=True)
+    delete_flg= models.BooleanField(default=False)
