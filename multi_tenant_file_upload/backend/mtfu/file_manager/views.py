@@ -96,3 +96,39 @@ class FileView(APIView):
             file.save()
 
         return Response({"message": "File deleted successfully"})
+
+
+class ListFilesView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        files = File.objects.filter(delete_flg=False)
+
+        if "tenant_username" in request.POST:
+            tenant_username = request.POST["tenant_username"]
+            files = files.filter(tenant__username=tenant_username)
+
+        if "resource" in request.POST:
+            resource = request.POST["resource"]
+            files = files.filter(resource=resource)
+
+        if "resource_id" in request.POST:
+            resource_id = request.POST["resource_id"]
+            files = files.filter(resource_id=resource_id)
+
+        file_list = []
+        for file in files:
+            file_list.append(
+                {
+                    "tenant": file.tenant.username,
+                    "resource": file.resource,
+                    "resource_id": file.resource_id,
+                    "name": file.name,
+                    "location": file.location,
+                    "expire_at": file.expire_at,
+                    "is_public": file.is_public,
+                }
+            )
+
+        return Response({"files": file_list})
