@@ -7,7 +7,7 @@ import boto3
 from django.conf import settings
 from botocore.exceptions import ClientError
 from mtfu.file_manager.models import File
-import datetime
+from dateutil.relativedelta import relativedelta
 from django.db import transaction
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Q
@@ -49,11 +49,8 @@ class UploadView(APIView):
             print(e)
             return
 
-        # Get the current time with timezone
-        now = timezone.now()
-
-        # Calculate tomorrow's date
-        tomorrow = now.date() + timezone.timedelta(days=1)
+        # calculate tomorrow with timezone
+        tomorrow = timezone.now() + relativedelta(days=1)
 
         file = File(
             name=filename,
