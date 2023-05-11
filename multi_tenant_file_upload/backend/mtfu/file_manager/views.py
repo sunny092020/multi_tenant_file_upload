@@ -11,6 +11,7 @@ import datetime
 from django.db import transaction
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Q
+from django.utils import timezone
 
 
 class UploadView(APIView):
@@ -72,7 +73,11 @@ class FileView(APIView):
         user = request.user
 
         files = File.objects.filter(
-            Q(tenant=user) | Q(is_public=True), resource=resource, resource_id=resourceId, delete_flg=False
+            Q(tenant=user) | Q(is_public=True),
+            resource=resource,
+            resource_id=resourceId,
+            delete_flg=False,
+            expire_at__gte=timezone.now(),
         )
 
         data = paginate_files(request, files)
@@ -99,7 +104,7 @@ class ListFilesView(APIView):
     def post(self, request):
         # get user from session
         user = request.user
-        files = File.objects.filter(Q(tenant=user) | Q(is_public=True), delete_flg=False)
+        files = File.objects.filter(Q(tenant=user) | Q(is_public=True), delete_flg=False, expire_at__gte=timezone.now())
 
         if "tenant_username" in request.POST:
             tenant_username = request.POST["tenant_username"]
