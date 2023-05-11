@@ -59,3 +59,27 @@ class UploadView(APIView):
         file.save()
 
         return Response({"message": "File uploaded successfully"})
+
+
+class FileView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, resource, resourceId):
+        # get user from session
+        user = request.user
+
+        files = File.objects.filter(tenant=user, resource=resource, resource_id=resourceId, delete_flg=False)
+
+        file_list = []
+        for file in files:
+            file_list.append(
+                {
+                    "name": file.name,
+                    "location": file.location,
+                    "expire_at": file.expire_at,
+                    "is_public": file.is_public,
+                }
+            )
+
+        return Response({"files": file_list})

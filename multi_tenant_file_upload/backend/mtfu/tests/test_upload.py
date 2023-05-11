@@ -31,6 +31,54 @@ def api_client():
     return client
 
 
+@pytest.fixture
+def tmp_files(tmp_path):
+    # Generate files with different names and content
+    files = []
+    for i in range(3):
+        file_path = tmp_path / f"test_file_{i}.txt"
+        with open(file_path, "w") as f:
+            f.write(f"test content {i}")
+        files.append(file_path)
+    return files
+
+
+def test_upload_tmp_files(tmp_files, api_client):
+    # Upload the files
+    for file_path in tmp_files:
+        with open(file_path, "rb") as file:
+            response = api_client.post(
+                "/api/upload",
+                {
+                    "file": file,
+                    "resource": "product",
+                    "resource_id": 1,
+                },
+            )
+            assert response.status_code == 200
+
+    # Verify that the files were uploaded
+    assert File.objects.count() == 3
+    for file_path in tmp_files:
+        file_name = os.path.basename(file_path)
+        assert File.objects.filter(name=file_name).exists()
+
+    # verify files/<str:resource>/<str:resourceId> endpoint
+    response = api_client.get("/api/files/product/1")
+    assert response.status_code == 200
+
+    response_files = response.data["files"]
+
+    assert len(response_files) == 3
+    assert response_files[0]["name"] == "test_file_0.txt"
+    assert response_files[1]["name"] == "test_file_1.txt"
+    assert response_files[2]["name"] == "test_file_2.txt"
+
+    assert response_files[0]["location"] == "asset_imgs/john1/test_file_0.txt"
+    assert response_files[1]["location"] == "asset_imgs/john1/test_file_1.txt"
+    assert response_files[2]["location"] == "asset_imgs/john1/test_file_2.txt"
+
+
 def test_upload_with_authorized_user(api_client):
     fileUploadPath = os.path.join(os.path.dirname(__file__), "test_file")
 
