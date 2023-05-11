@@ -1,0 +1,56 @@
+version: "3.2"
+
+services:
+  mtfu_postgresql:
+    image: postgres:15
+    container_name: mtfu_postgresql
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DB=mtfu
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - mtfu-db:/var/lib/postgresql/data
+    networks:
+      mtfu_network:
+        ipv4_address: 10.7.0.5
+
+  mtfu_backend:
+    expose:
+      - 8000
+    ports:
+      - 8000:8000
+    build:
+      context: ./backend
+      dockerfile: ./Dockerfile
+    container_name: mtfu_backend
+    command: gunicorn mtfu.wsgi:application --bind 0.0.0.0:8000 --reload
+    volumes:
+      - ./backend:/home/app/web
+    environment:
+      - EXTERNAL_IP=127.0.0.1
+      - POSTGRES_HOST=10.7.0.5
+      - POSTGRES_DB=mtfu
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - DEBUG=True
+      - SECRET_KEY=django-insecure
+    restart: always
+    depends_on:
+      - mtfu_postgresql
+    networks:
+      mtfu_network:
+        ipv4_address: 10.7.0.7
+
+networks:
+  mtfu_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.7.0.0/16
+
+volumes:
+  mtfu-db:
+    driver: local
