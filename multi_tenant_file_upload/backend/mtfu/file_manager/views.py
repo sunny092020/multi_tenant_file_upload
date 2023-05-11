@@ -9,6 +9,7 @@ from botocore.exceptions import ClientError
 from mtfu.file_manager.models import File
 import datetime
 from django.db import transaction
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 
 
 class UploadView(APIView):
@@ -71,18 +72,8 @@ class FileView(APIView):
 
         files = File.objects.filter(tenant=user, resource=resource, resource_id=resourceId, delete_flg=False)
 
-        file_list = []
-        for file in files:
-            file_list.append(
-                {
-                    "name": file.name,
-                    "location": file.location,
-                    "expire_at": file.expire_at,
-                    "is_public": file.is_public,
-                }
-            )
-
-        return Response({"files": file_list})
+        data = paginate_files(request, files)
+        return Response(data)
 
     @transaction.atomic
     def delete(self, request, resource, resourceId):
@@ -117,18 +108,41 @@ class ListFilesView(APIView):
             resource_id = request.POST["resource_id"]
             files = files.filter(resource_id=resource_id)
 
-        file_list = []
-        for file in files:
-            file_list.append(
-                {
-                    "tenant": file.tenant.username,
-                    "resource": file.resource,
-                    "resource_id": file.resource_id,
-                    "name": file.name,
-                    "location": file.location,
-                    "expire_at": file.expire_at,
-                    "is_public": file.is_public,
-                }
-            )
+        data = paginate_files(request, files)
+        return Response(data)
 
-        return Response({"files": file_list})
+
+def paginate_files(request, files):
+    # Get pagination parameters from query parameters, or use defaults if not provided
+    page_number = request.GET.get("page", 1)
+    page_size = request.GET.get("page_size", 10)
+
+    paginator = Paginator(files, page_size)
+    try:
+        file_list = paginator.page(page_number)
+    except PageNotAnInteger:
+        # If page_number is not an integer, deliver first page.
+        file_list = paginator.page(1)
+    except EmptyPage:
+        # If page_number is out of range (e.g. 9999), deliver last page of results.
+        file_list = paginator.page(paginator.num_pages)
+
+    # Return serialized data with pagination information
+    data = {
+        "count": paginator.count,
+        "num_pages": paginator.num_pages,
+        "page_range": list(paginator.page_range),
+        "files": [
+            {
+                "tenant": file.tenant.username,
+                "resource": file.resource,
+                "resource_id": file.resource_id,
+                "name": file.name,
+                "location": file.location,
+                "expire_at": file.expire_at,
+                "is_public": file.is_public,
+            }
+            for file in file_list
+        ],
+    }
+    return data
