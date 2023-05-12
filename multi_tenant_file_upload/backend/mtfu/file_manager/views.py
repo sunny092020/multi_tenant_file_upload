@@ -98,27 +98,17 @@ class UploadView(APIView):
     def _create_file_object(self, user, filename, resource, resource_id, file_location):
         tomorrow = timezone.now() + relativedelta(days=1)
 
-        # if file existed, update it, else create new
-        existing_file = File.objects.filter(
+        defaults = {
+            "expire_at": tomorrow,
+            "location": file_location,
+        }
+        File.objects.update_or_create(
             tenant=user,
             resource=resource,
             resource_id=resource_id,
             name=filename,
-        ).first()
-
-        if existing_file:
-            existing_file.expire_at = tomorrow
-            existing_file.location = file_location
-            existing_file.save()
-        else:
-            File.objects.create(
-                name=filename,
-                resource=resource,
-                resource_id=resource_id,
-                tenant=user,
-                location=file_location,
-                expire_at=tomorrow,
-            )
+            defaults=defaults,
+        )
 
 
 class FileView(APIView):
