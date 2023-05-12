@@ -22,7 +22,6 @@ class UploadView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FileUploadParser]
 
-    @transaction.atomic
     def post(self, request):
         try:
             upload_file, resource, resource_id = self._extract_data(request)
@@ -40,7 +39,13 @@ class UploadView(APIView):
             print(e)
             return Response({"message": "File upload failed"}, status=status.HTTP_400_BAD_REQUEST)
 
-        self._create_file_object(user, upload_file.name, resource, resource_id, file_location)
+        try:
+            self._create_file_object(user, upload_file.name, resource, resource_id, file_location)
+        except Exception as e:
+            print(e)
+            # remove uploaded file from s3
+            s3_client.delete_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=file_location)
+            return Response({"message": "File save failed"}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({"message": "File uploaded successfully"})
 
@@ -82,16 +87,28 @@ class UploadView(APIView):
 
     def _create_file_object(self, user, filename, resource, resource_id, file_location):
         tomorrow = timezone.now() + relativedelta(days=1)
-        file = File(
-            name=filename,
+
+        # if file existed, update it, else create new
+        existing_file = File.objects.filter(
+            tenant=user,
             resource=resource,
             resource_id=resource_id,
-            tenant=user,
-            location=file_location,
-            expire_at=tomorrow,
-        )
-        file.save()
-        return file
+            name=filename,
+        ).first()
+
+        if existing_file:
+            existing_file.expire_at = tomorrow
+            existing_file.location = file_location
+            existing_file.save()
+        else:
+            File.objects.create(
+                name=filename,
+                resource=resource,
+                resource_id=resource_id,
+                tenant=user,
+                location=file_location,
+                expire_at=tomorrow,
+            )
 
 
 class FileView(APIView):
@@ -162,8 +179,8 @@ class ListFilesView(APIView):
 
 
 def paginate_files(request, files):
-    page_number = request.GET.get("page", 1)
-    page_size = request.GET.get("page_size", 10)
+    page_number = request.POST.get("page", 1)
+    page_size = request.POST.get("page_size", 10)
 
     files = files.order_by("name")
 

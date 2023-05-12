@@ -9,7 +9,7 @@ django.setup()
 from rest_framework.test import APIClient
 from mtfu.auth_user.models import Tenant
 from mtfu.file_manager.models import File
-
+from django.test import override_settings
 
 @pytest.fixture
 def john():
@@ -346,3 +346,64 @@ def test_delete_file_without_resource(john_client):
 def test_delete_file_without_resource_id_and_resource(john_client):
     response = john_client.delete("/api/files")
     assert response.status_code == 404
+
+def test_upload_file_to_s3_failure(john_client, tmp_file):
+    # modify AWS_SECRET_ACCESS_KEY in settings.py to make upload to s3 fail
+    with override_settings(AWS_SECRET_ACCESS_KEY='incorrect_secret_access_key'):
+        response = john_client.post(
+            "/api/upload",
+            {
+                "file": open(tmp_file, "rb"),
+                "resource": "product",
+                "resource_id": 1,
+            },
+        )
+        assert response.status_code == 400
+        assert response.data["message"] == "File upload failed"
+
+def test_user_upload_the_same_file_twice(john_client, tmp_file):
+    with open(tmp_file, "rb") as file:
+        response = john_client.post(
+            "/api/upload",
+            {
+                "file": file,
+                "resource": "product",
+                "resource_id": 1,
+            },
+        )
+        assert response.status_code == 200
+
+        response = john_client.post(
+            "/api/upload",
+            {
+                "file": file,
+                "resource": "product",
+                "resource_id": 1,
+            },
+        )
+        assert response.status_code == 200
+
+def test_pagination(john_client, tmp_file):
+    for i in range(1, 11):
+        with open(tmp_file, "rb") as file:
+            response = john_client.post(
+                "/api/upload",
+                {
+                    "file": file,
+                    "resource": "product",
+                    "resource_id": i,
+                },
+            )
+            assert response.status_code == 200
+
+    response = john_client.post("/api/list_files", {"page": 1, "page_size": 3})
+    response_files = response.data["files"]
+    assert len(response_files) == 3
+
+    response = john_client.post("/api/list_files", {"page": 2, "page_size": 5})
+    response_files = response.data["files"]
+    assert len(response_files) == 5
+
+    response = john_client.post("/api/list_files", {"page": 4, "page_size": 3})
+    response_files = response.data["files"]
+    assert len(response_files) == 1
