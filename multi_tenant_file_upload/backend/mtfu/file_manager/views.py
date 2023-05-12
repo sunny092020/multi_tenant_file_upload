@@ -36,11 +36,11 @@ class UploadView(APIView):
                 {"message": f"File size exceeds the maximum allowed size of {max_file_size} bytes"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        
+
         # Validate resource
         if "resource" not in request.data:
             return Response({"message": "No resource found"}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         # Validate resource id
         if "resource_id" not in request.data:
             return Response({"message": "No resource id found"}, status=status.HTTP_400_BAD_REQUEST)

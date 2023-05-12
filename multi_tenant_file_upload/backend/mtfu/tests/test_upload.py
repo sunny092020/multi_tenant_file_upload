@@ -279,6 +279,7 @@ def test_upload_file_bigger_than_10mb(john_client, bigger_than_10mb_file):
         )
         assert response.status_code == 400
 
+
 def test_upload_without_file(john_client):
     response = john_client.post(
         "/api/upload",
@@ -303,6 +304,7 @@ def test_upload_without_resource(john_client, tmp_file):
         assert response.status_code == 400
         assert response.data["message"] == "No resource found"
 
+
 def test_upload_without_resource_id(john_client, tmp_file):
     with open(tmp_file, "rb") as file:
         response = john_client.post(
@@ -315,25 +317,31 @@ def test_upload_without_resource_id(john_client, tmp_file):
         assert response.status_code == 400
         assert response.data["message"] == "No resource id found"
 
+
 def test_retrieve_file_without_resource_id(john_client):
     response = john_client.get("/api/files/product")
     assert response.status_code == 404
+
 
 def test_retrieve_file_without_resource(john_client):
     response = john_client.get("/api/files/1")
     assert response.status_code == 404
 
+
 def test_retrieve_file_without_resource_id_and_resource(john_client):
     response = john_client.get("/api/files")
     assert response.status_code == 404
+
 
 def test_delete_file_without_resource_id(john_client):
     response = john_client.delete("/api/files/product")
     assert response.status_code == 404
 
+
 def test_delete_file_without_resource(john_client):
     response = john_client.delete("/api/files/1")
     assert response.status_code == 404
+
 
 def test_delete_file_without_resource_id_and_resource(john_client):
     response = john_client.delete("/api/files")
