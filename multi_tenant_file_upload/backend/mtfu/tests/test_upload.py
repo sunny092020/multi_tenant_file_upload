@@ -289,7 +289,7 @@ def test_upload_without_file(john_client):
         },
     )
     assert response.status_code == 400
-    assert response.data["message"] == "No file was submitted."
+    assert response.data["message"] == "['No file was submitted.']"
 
 
 def test_upload_without_resource(john_client, tmp_file):
@@ -302,7 +302,7 @@ def test_upload_without_resource(john_client, tmp_file):
             },
         )
         assert response.status_code == 400
-        assert response.data["message"] == "No resource found"
+        assert response.data["message"] == "['No resource found']"
 
 
 def test_upload_without_resource_id(john_client, tmp_file):
@@ -315,7 +315,7 @@ def test_upload_without_resource_id(john_client, tmp_file):
             },
         )
         assert response.status_code == 400
-        assert response.data["message"] == "No resource id found"
+        assert response.data["message"] == "['No resource id found']"
 
 
 def test_retrieve_file_without_resource_id(john_client):

@@ -14,6 +14,7 @@ from django.db import transaction
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Q
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 
 class UploadView(APIView):
@@ -23,58 +24,64 @@ class UploadView(APIView):
 
     @transaction.atomic
     def post(self, request):
-        # Validate file
-        if "file" not in request.data:
-            return Response({"message": "No file was submitted."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            upload_file, resource, resource_id = self._extract_data(request)
+            self._validate_data(upload_file, resource, resource_id)
+        except ValidationError as e:
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-        upload_file = request.data["file"]
+        s3_client = self._get_s3_client()
+        user = request.user
+        file_location = f"{settings.ASSET_IMAGE_FOLDER}/{user.username}/{upload_file.name}"
 
-        # Validate file size
+        try:
+            self._upload_file_to_s3(upload_file, s3_client, file_location)
+        except ClientError as e:
+            print(e)
+            return Response({"message": "File upload failed"}, status=status.HTTP_400_BAD_REQUEST)
+
+        self._create_file_object(user, upload_file.name, resource, resource_id, file_location)
+
+        return Response({"message": "File uploaded successfully"})
+
+    def _extract_data(self, request):
+        data = request.data
+        upload_file = data.get("file")
+        resource = data.get("resource")
+        resource_id = data.get("resource_id")
+        return upload_file, resource, resource_id
+
+    def _validate_data(self, upload_file, resource, resource_id):
+        if not upload_file:
+            raise ValidationError("No file was submitted.")
+
         max_file_size = settings.MAX_FILE_SIZE
         if upload_file.size > max_file_size:
-            return Response(
-                {"message": f"File size exceeds the maximum allowed size of {max_file_size} bytes"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            raise ValidationError(f"File size exceeds the maximum allowed size of {max_file_size} bytes")
 
-        # Validate resource
-        if "resource" not in request.data:
-            return Response({"message": "No resource found"}, status=status.HTTP_400_BAD_REQUEST)
+        if not resource:
+            raise ValidationError("No resource found")
 
-        # Validate resource id
-        if "resource_id" not in request.data:
-            return Response({"message": "No resource id found"}, status=status.HTTP_400_BAD_REQUEST)
+        if not resource_id:
+            raise ValidationError("No resource id found")
 
-        resource = request.data["resource"]
-        resource_id = request.data["resource_id"]
-
-        # Uploading the image to S3
-        filename = upload_file.name
-        s3_client = boto3.client(
+    def _get_s3_client(self):
+        return boto3.client(
             "s3",
             aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
             aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
             region_name=settings.AWS_S3_REGION_NAME,
         )
 
-        # get user from session
-        user = request.user
+    def _upload_file_to_s3(self, upload_file, s3_client, file_location):
+        s3_client.upload_fileobj(
+            upload_file,
+            settings.AWS_STORAGE_BUCKET_NAME,
+            file_location,
+        )
 
-        file_location = f"{settings.ASSET_IMAGE_FOLDER}/{user.username}/{filename}"
-
-        try:
-            s3_client.upload_fileobj(
-                upload_file,
-                settings.AWS_STORAGE_BUCKET_NAME,
-                file_location,
-            )
-        except ClientError as e:
-            print(e)
-            return Response({"message": "File upload failed"}, status=status.HTTP_400_BAD_REQUEST)
-
-        # calculate tomorrow with timezone
+    def _create_file_object(self, user, filename, resource, resource_id, file_location):
         tomorrow = timezone.now() + relativedelta(days=1)
-
         file = File(
             name=filename,
             resource=resource,
@@ -84,8 +91,7 @@ class UploadView(APIView):
             expire_at=tomorrow,
         )
         file.save()
-
-        return Response({"message": "File uploaded successfully"})
+        return file
 
 
 class FileView(APIView):
