@@ -118,7 +118,12 @@ class FileView(APIView):
         # get user from session
         user = request.user
 
-        files = File.objects.filter(tenant=user, resource=resource, resource_id=resourceId, delete_flg=False)
+        files = File.objects.filter(
+            tenant=user,
+            resource=resource,
+            resource_id=resourceId,
+            delete_flg=False
+        )
 
         for file in files:
             file.delete_flg = True
@@ -134,7 +139,11 @@ class ListFilesView(APIView):
     def post(self, request):
         # get user from session
         user = request.user
-        files = File.objects.filter(Q(tenant=user) | Q(is_public=True), delete_flg=False, expire_at__gte=timezone.now())
+        files = File.objects.filter(
+            Q(tenant=user) | Q(is_public=True),
+            delete_flg=False,
+            expire_at__gte=timezone.now()
+        )
 
         if "tenant_username" in request.POST:
             tenant_username = request.POST["tenant_username"]
@@ -153,7 +162,6 @@ class ListFilesView(APIView):
 
 
 def paginate_files(request, files):
-    # Get pagination parameters from query parameters, or use defaults if not provided
     page_number = request.GET.get("page", 1)
     page_size = request.GET.get("page_size", 10)
 
@@ -163,10 +171,8 @@ def paginate_files(request, files):
     try:
         file_list = paginator.page(page_number)
     except PageNotAnInteger:
-        # If page_number is not an integer, deliver first page.
         file_list = paginator.page(1)
     except EmptyPage:
-        # If page_number is out of range (e.g. 9999), deliver last page of results.
         file_list = paginator.page(paginator.num_pages)
 
     # Return serialized data with pagination information
