@@ -23,6 +23,10 @@ class UploadView(APIView):
 
     @transaction.atomic
     def post(self, request):
+        # Validate file
+        if "file" not in request.data:
+            return Response({"message": "No file was submitted."}, status=status.HTTP_400_BAD_REQUEST)
+
         upload_file = request.data["file"]
 
         # Validate file size
@@ -32,6 +36,14 @@ class UploadView(APIView):
                 {"message": f"File size exceeds the maximum allowed size of {max_file_size} bytes"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        
+        # Validate resource
+        if "resource" not in request.data:
+            return Response({"message": "No resource found"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Validate resource id
+        if "resource_id" not in request.data:
+            return Response({"message": "No resource id found"}, status=status.HTTP_400_BAD_REQUEST)
 
         resource = request.data["resource"]
         resource_id = request.data["resource_id"]

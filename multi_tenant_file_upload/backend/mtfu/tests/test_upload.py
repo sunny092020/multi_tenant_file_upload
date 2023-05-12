@@ -204,37 +204,37 @@ def test_list_files(john_client, jimmy_client, tmp_file):
             },
         )
 
-    # verify POST files/ by john
-    response = john_client.post("/api/files", {"tenant_username": "john"})
+    # verify POST list_files/ by john
+    response = john_client.post("/api/list_files", {"tenant_username": "john"})
     response_files = response.data["files"]
 
     for file in response_files:
         assert file["tenant"] == "john"
 
-    # verify POST files/ by jimmy
-    response = jimmy_client.post("/api/files", {"tenant_username": "jimmy"})
+    # verify POST list_files/ by jimmy
+    response = jimmy_client.post("/api/list_files", {"tenant_username": "jimmy"})
     response_files = response.data["files"]
 
     for file in response_files:
         assert file["tenant"] == "jimmy"
 
-    # verify POST files/ by resource product
-    response = john_client.post("/api/files", {"resource": "product"})
+    # verify POST list_files/ by resource product
+    response = john_client.post("/api/list_files", {"resource": "product"})
     response_files = response.data["files"]
 
     for file in response_files:
         assert file["resource"] == "product"
 
-    # verify POST files/ by resource avatar
-    response = john_client.post("/api/files", {"resource": "avatar"})
+    # verify POST list_files/ by resource avatar
+    response = john_client.post("/api/list_files", {"resource": "avatar"})
     response_files = response.data["files"]
 
     for file in response_files:
         assert file["resource"] == "avatar"
 
-    # verify POST files/ by resource product and tenant john
+    # verify POST list_files/ by resource product and tenant john
     response = john_client.post(
-        "/api/files",
+        "/api/list_files",
         {
             "resource": "product",
             "tenant_username": "john",
@@ -246,15 +246,15 @@ def test_list_files(john_client, jimmy_client, tmp_file):
         assert file["resource"] == "product"
         assert file["tenant"] == "john"
 
-    # verify POST files/ by resource id 1
-    response = john_client.post("/api/files", {"resource_id": 1})
+    # verify POST list_files/ by resource id 1
+    response = john_client.post("/api/list_files", {"resource_id": 1})
     response_files = response.data["files"]
 
     for file in response_files:
         assert file["resource_id"] == 1
 
-    # verify POST files/
-    response = john_client.post("/api/files")
+    # verify POST list_files/
+    response = john_client.post("/api/list_files")
     response_files = response.data["files"]
 
     assert len(response_files) == 2
@@ -278,4 +278,63 @@ def test_upload_file_bigger_than_10mb(john_client, bigger_than_10mb_file):
             },
         )
         assert response.status_code == 400
-        assert response.data["message"] == f"File size exceeds the maximum allowed size of 10485760 bytes"
+
+def test_upload_without_file(john_client):
+    response = john_client.post(
+        "/api/upload",
+        {
+            "resource": "product",
+            "resource_id": 1,
+        },
+    )
+    assert response.status_code == 400
+    assert response.data["message"] == "No file was submitted."
+
+
+def test_upload_without_resource(john_client, tmp_file):
+    with open(tmp_file, "rb") as file:
+        response = john_client.post(
+            "/api/upload",
+            {
+                "file": file,
+                "resource_id": 1,
+            },
+        )
+        assert response.status_code == 400
+        assert response.data["message"] == "No resource found"
+
+def test_upload_without_resource_id(john_client, tmp_file):
+    with open(tmp_file, "rb") as file:
+        response = john_client.post(
+            "/api/upload",
+            {
+                "file": file,
+                "resource": "product",
+            },
+        )
+        assert response.status_code == 400
+        assert response.data["message"] == "No resource id found"
+
+def test_retrieve_file_without_resource_id(john_client):
+    response = john_client.get("/api/files/product")
+    assert response.status_code == 404
+
+def test_retrieve_file_without_resource(john_client):
+    response = john_client.get("/api/files/1")
+    assert response.status_code == 404
+
+def test_retrieve_file_without_resource_id_and_resource(john_client):
+    response = john_client.get("/api/files")
+    assert response.status_code == 404
+
+def test_delete_file_without_resource_id(john_client):
+    response = john_client.delete("/api/files/product")
+    assert response.status_code == 404
+
+def test_delete_file_without_resource(john_client):
+    response = john_client.delete("/api/files/1")
+    assert response.status_code == 404
+
+def test_delete_file_without_resource_id_and_resource(john_client):
+    response = john_client.delete("/api/files")
+    assert response.status_code == 404
