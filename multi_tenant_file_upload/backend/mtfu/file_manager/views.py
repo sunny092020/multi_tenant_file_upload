@@ -37,15 +37,23 @@ class UploadView(APIView):
             self._upload_file_to_s3(upload_file, s3_client, file_location)
         except ClientError as e:
             print(e)
-            return Response({"message": "File upload failed"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"message": "File upload failed"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         try:
-            self._create_file_object(user, upload_file.name, resource, resource_id, file_location)
+            self._create_file_object(
+                user, upload_file.name, resource, resource_id, file_location
+            )
         except Exception as e:
             print(e)
             # remove uploaded file from s3
             s3_client.delete_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=file_location)
-            return Response({"message": "File save failed"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"message": "File save failed"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         return Response({"message": "File uploaded successfully"})
 
@@ -62,7 +70,9 @@ class UploadView(APIView):
 
         max_file_size = settings.MAX_FILE_SIZE
         if upload_file.size > max_file_size:
-            raise ValidationError(f"File size exceeds the maximum allowed size of {max_file_size} bytes")
+            raise ValidationError(
+                f"File size exceeds the maximum allowed size of {max_file_size} bytes"
+            )
 
         if not resource:
             raise ValidationError("No resource found")
@@ -139,7 +149,7 @@ class FileView(APIView):
             tenant=user,
             resource=resource,
             resource_id=resourceId,
-            delete_flg=False
+            delete_flg=False,
         )
 
         for file in files:
@@ -159,7 +169,7 @@ class ListFilesView(APIView):
         files = File.objects.filter(
             Q(tenant=user) | Q(is_public=True),
             delete_flg=False,
-            expire_at__gte=timezone.now()
+            expire_at__gte=timezone.now(),
         )
 
         if "tenant_username" in request.POST:

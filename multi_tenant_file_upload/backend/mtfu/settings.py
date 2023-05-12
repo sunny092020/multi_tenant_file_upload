@@ -43,7 +43,11 @@ DEBUG = get_bool_from_env("DEBUG", True)
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "::1", "10.7.0.7", "10.7.0.6", "*"]
 
-CORS_ALLOWED_ORIGINS = ["http://10.7.0.6:3000", "http://127.0.0.1:3000", "http://localhost:3000"]
+CORS_ALLOWED_ORIGINS = [
+    "http://10.7.0.6:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:3000",
+]
 
 CORS_ALLOW_CREDENTIALS = True
 # Application definition
@@ -63,7 +67,9 @@ INSTALLED_APPS = [
 ]
 
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": ("rest_framework_simplejwt.authentication.JWTAuthentication",),
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
 }
 
@@ -120,7 +126,9 @@ DATABASES = {
         "PORT": "5432",
     },
 }
-if "test" in sys.argv or "test\\_coverage" in sys.argv:  # Covers regular testing and django-coverage
+if (
+    "test" in sys.argv or "test\\_coverage" in sys.argv
+):  # Covers regular testing and django-coverage
     DATABASES["default"]["ENGINE"] = "django.db.backends.sqlite3"
     DATABASES["default"]["NAME"] = ":memory:"
 

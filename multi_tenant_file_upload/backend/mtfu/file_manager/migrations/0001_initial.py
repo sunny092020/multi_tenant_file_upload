@@ -29,7 +29,10 @@ class Migration(migrations.Migration):
                 ("location", models.CharField(max_length=100)),
                 ("expire_at", models.DateTimeField(blank=True, null=True)),
                 ("is_public", models.BooleanField(default=False)),
-                ("resource", models.CharField(blank=True, max_length=100, null=True)),
+                (
+                    "resource",
+                    models.CharField(blank=True, max_length=100, null=True),
+                ),
                 ("resource_id", models.IntegerField(blank=True, null=True)),
                 (
                     "tenant",
