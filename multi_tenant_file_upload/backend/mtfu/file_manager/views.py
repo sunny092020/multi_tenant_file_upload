@@ -3,6 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework import status
+
 import boto3
 from django.conf import settings
 from botocore.exceptions import ClientError
@@ -22,6 +24,15 @@ class UploadView(APIView):
     @transaction.atomic
     def post(self, request):
         upload_file = request.data["file"]
+
+        # Validate file size
+        max_file_size = settings.MAX_FILE_SIZE
+        if upload_file.size > max_file_size:
+            return Response(
+                {"message": f"File size exceeds the maximum allowed size of {max_file_size} bytes"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         resource = request.data["resource"]
         resource_id = request.data["resource_id"]
 
@@ -47,7 +58,7 @@ class UploadView(APIView):
             )
         except ClientError as e:
             print(e)
-            return
+            return Response({"message": "File upload failed"}, status=status.HTTP_400_BAD_REQUEST)
 
         # calculate tomorrow with timezone
         tomorrow = timezone.now() + relativedelta(days=1)

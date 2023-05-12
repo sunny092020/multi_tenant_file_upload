@@ -207,3 +207,5 @@ STORAGES = {
         "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
     },
 }
+
+MAX_FILE_SIZE = 1024 * 1024 * 10  # 10MB

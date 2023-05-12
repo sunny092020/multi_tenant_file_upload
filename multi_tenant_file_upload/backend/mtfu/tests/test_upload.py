@@ -258,3 +258,24 @@ def test_list_files(john_client, jimmy_client, tmp_file):
     response_files = response.data["files"]
 
     assert len(response_files) == 2
+
+
+@pytest.fixture
+def bigger_than_10mb_file(tmp_path):
+    file_path = tmp_path / "bigger_than_10mb_file.txt"
+    file_path.write_text("a" * 1024 * 1024 * 11)
+    return file_path
+
+
+def test_upload_file_bigger_than_10mb(john_client, bigger_than_10mb_file):
+    with open(bigger_than_10mb_file, "rb") as file:
+        response = john_client.post(
+            "/api/upload",
+            {
+                "file": file,
+                "resource": "product",
+                "resource_id": 1,
+            },
+        )
+        assert response.status_code == 400
+        assert response.data["message"] == f"File size exceeds the maximum allowed size of 10485760 bytes"
