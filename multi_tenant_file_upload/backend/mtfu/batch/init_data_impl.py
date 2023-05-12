@@ -9,12 +9,9 @@ def copy_to_postgresql():
 def create_tenants():
     for i in range(1, 11):
         username = "john" + str(i)
-        
+
         # check if user exists
         if Tenant.objects.filter(Q(username=username)).exists():
             continue
 
-        Tenant.create(
-            username=username,
-            password="test"
-        )
+        Tenant.create(username=username, password="test")
