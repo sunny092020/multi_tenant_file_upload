@@ -166,17 +166,21 @@ def test_upload_with_unauthorized_user():
         response = APIClient().post("/api/upload", {"file": file})
         assert response.status_code == 401
 
+
 def test_retrieve_files_with_unauthorized_user():
     response = APIClient().get("/api/files/product/1")
     assert response.status_code == 401
+
 
 def test_delete_files_with_unauthorized_user():
     response = APIClient().delete("/api/files/product/1")
     assert response.status_code == 401
 
+
 def test_list_files_with_unauthorized_user():
     response = APIClient().post("/api/list_files")
     assert response.status_code == 401
+
 
 def test_list_files(john_client, jimmy_client, tmp_file):
     with open(tmp_file, "rb") as file:
