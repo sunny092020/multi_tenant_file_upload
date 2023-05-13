@@ -4,7 +4,7 @@ The purpose of this API is to allow multiple tenants to upload files to their re
 
 ## steps how to provision the api
 
-start an instance in EC2, t3a.micro is recommended and
+start an instance in EC2, t3a.micro, ubuntu server 22.04 TLS is recommended and
 ssh into EC2 instance
 
 pull the git
