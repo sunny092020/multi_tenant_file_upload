@@ -411,3 +411,30 @@ def test_pagination(john_client, tmp_file):
     response = john_client.post("/api/list_files", {"page": 4, "page_size": 3})
     response_files = response.data["files"]
     assert len(response_files) == 1
+
+
+def test_file_upload_invalid(john_client):
+    response = john_client.post(
+        "/api/upload",
+        {
+            "file": "invalid",
+            "resource": "product",
+            "resource_id": 1,
+        },
+    )
+    assert response.status_code == 400
+    assert response.data["message"] == "['Invalid file']"
+
+
+def test_resource_id_not_a_number(john_client, tmp_file):
+    with open(tmp_file, "rb") as file:
+        response = john_client.post(
+            "/api/upload",
+            {
+                "file": file,
+                "resource": "product",
+                "resource_id": "not_a_number",
+            },
+        )
+        assert response.status_code == 400
+        assert response.data["message"] == "['resource id not a integer']"

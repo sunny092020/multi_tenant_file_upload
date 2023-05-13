@@ -68,6 +68,9 @@ class UploadView(APIView):
         if not upload_file:
             raise ValidationError("No file was submitted.")
 
+        if not hasattr(upload_file, "size"):
+            raise ValidationError("Invalid file")
+
         max_file_size = settings.MAX_FILE_SIZE
         if upload_file.size > max_file_size:
             raise ValidationError(
@@ -79,6 +82,12 @@ class UploadView(APIView):
 
         if not resource_id:
             raise ValidationError("No resource id found")
+
+        # check resource_id not a integer
+        try:
+            int(resource_id)
+        except ValueError:
+            raise ValidationError("resource id not a integer")
 
     def _get_s3_client(self):
         return boto3.client(
