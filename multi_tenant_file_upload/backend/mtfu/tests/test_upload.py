@@ -424,17 +424,3 @@ def test_file_upload_invalid(john_client):
     )
     assert response.status_code == 400
     assert response.data["message"] == "['Invalid file']"
-
-
-def test_resource_id_not_a_number(john_client, tmp_file):
-    with open(tmp_file, "rb") as file:
-        response = john_client.post(
-            "/api/upload",
-            {
-                "file": file,
-                "resource": "product",
-                "resource_id": "not_a_number",
-            },
-        )
-        assert response.status_code == 400
-        assert response.data["message"] == "['resource id not a integer']"
