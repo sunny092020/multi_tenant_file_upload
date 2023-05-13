@@ -55,7 +55,7 @@ create an AWS api gateway, which serves https from client and route request to o
 
 get your jwt token as john1
 ```
-curl --location --request POST 'https://7mp3j30xzc.execute-api.ap-southeast-1.amazonaws.com/api/token/' \
+curl --location --request POST '<API_ENDPOINT>/api/token/' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "username": "john1",
@@ -69,31 +69,31 @@ you need to take the <ACCESS_TOKEN>
 
 use the token to upload a file on behalf of john1
 ```
-curl --location --request POST 'https://7mp3j30xzc.execute-api.ap-southeast-1.amazonaws.com/api/upload' \
+curl --location --request POST '<API_ENDPOINT>/api/upload' \
 --header 'Authorization: Bearer <ACCESS_TOKEN>' \
 --form 'file=@my_file' \
 --form 'resource=product' \
 --form 'resource_id=1'
 
-curl --location --request POST 'https://7mp3j30xzc.execute-api.ap-southeast-1.amazonaws.com/api/upload' --header 'Authorization: Bearer <ACCESS_TOKEN>' \
+curl --location --request POST '<API_ENDPOINT>/api/upload' --header 'Authorization: Bearer <ACCESS_TOKEN>' \
 --form 'file=@my_file' \
 --form 'resource=avatar' \
 --form 'resource_id=1'
 
-curl --location --request GET 'https://7mp3j30xzc.execute-api.ap-southeast-1.amazonaws.com/api/files/product/1' --header 'Authorization: Bearer <ACCESS_TOKEN>'
+curl --location --request GET '<API_ENDPOINT>/api/files/product/1' --header 'Authorization: Bearer <ACCESS_TOKEN>'
 
-curl --location --request GET 'https://7mp3j30xzc.execute-api.ap-southeast-1.amazonaws.com/api/files/product/10' --header 'Authorization: Bearer <ACCESS_TOKEN>'
+curl --location --request GET '<API_ENDPOINT>/api/files/product/10' --header 'Authorization: Bearer <ACCESS_TOKEN>'
 
-curl --location --request GET 'https://7mp3j30xzc.execute-api.ap-southeast-1.amazonaws.com/api/files/product/2' --header 'Authorization: Bearer <ACCESS_TOKEN>'
+curl --location --request GET '<API_ENDPOINT>/api/files/product/2' --header 'Authorization: Bearer <ACCESS_TOKEN>'
 
-curl --location --request GET 'https://7mp3j30xzc.execute-api.ap-southeast-1.amazonaws.com/api/files/avatar/1' --header 'Authorization: Bearer <ACCESS_TOKEN>'
+curl --location --request GET '<API_ENDPOINT>/api/files/avatar/1' --header 'Authorization: Bearer <ACCESS_TOKEN>'
 
-curl --location --request GET 'https://7mp3j30xzc.execute-api.ap-southeast-1.amazonaws.com/api/files/2' --header 'Authorization: Bearer <ACCESS_TOKEN>'
+curl --location --request GET '<API_ENDPOINT>/api/files/2' --header 'Authorization: Bearer <ACCESS_TOKEN>'
 ```
 
 get your jwt token as john2
 ```
-curl --location --request POST 'https://7mp3j30xzc.execute-api.ap-southeast-1.amazonaws.com/api/token/' \
+curl --location --request POST '<API_ENDPOINT>/api/token/' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "username": "john2",
@@ -102,7 +102,7 @@ curl --location --request POST 'https://7mp3j30xzc.execute-api.ap-southeast-1.am
 ```
 use the token to list files on behalf of john2
 ```
-curl --location --request GET 'https://7mp3j30xzc.execute-api.ap-southeast-1.amazonaws.com/api/files/product/1' --header 'Authorization: Bearer <ACCESS_TOKEN>'
+curl --location --request GET '<API_ENDPOINT>/api/files/product/1' --header 'Authorization: Bearer <ACCESS_TOKEN>'
 ```
 
 ## Design decisions:
