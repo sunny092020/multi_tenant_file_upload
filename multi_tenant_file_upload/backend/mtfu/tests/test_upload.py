@@ -424,3 +424,41 @@ def test_file_upload_invalid(john_client):
     )
     assert response.status_code == 400
     assert response.data["message"] == "['Invalid file']"
+
+
+@pytest.fixture
+def ten_tmp_files(tmp_path):
+    # Generate files with different names and content
+    files = []
+    for i in range(10):
+        file_path = tmp_path / f"test_file_{i}.txt"
+        with open(file_path, "w") as f:
+            f.write(f"test content {i}")
+        files.append(file_path)
+    return files
+
+
+# test pagination with retrieve files GET "/api/files/{resource}/{resource_id}"
+def test_pagination_with_retrieve_files(john_client, ten_tmp_files):
+    for file in ten_tmp_files:
+        response = john_client.post(
+            "/api/upload",
+            {
+                "file": open(file, "rb"),
+                "resource": "product",
+                "resource_id": 1,
+            },
+        )
+        assert response.status_code == 200
+
+    response = john_client.get("/api/files/product/1?page=1&page_size=3")
+    response_files = response.data["files"]
+    assert len(response_files) == 3
+
+    response = john_client.get("/api/files/product/1?page=2&page_size=5")
+    response_files = response.data["files"]
+    assert len(response_files) == 5
+
+    response = john_client.get("/api/files/product/1?page=4&page_size=3")
+    response_files = response.data["files"]
+    assert len(response_files) == 1
