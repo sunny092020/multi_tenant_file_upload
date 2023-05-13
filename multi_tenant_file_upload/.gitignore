@@ -33,3 +33,5 @@ venv.bak/
 django-queries-results.html
 mediafiles/
 staticfiles/
+/my_file
+test_deployment.sh
