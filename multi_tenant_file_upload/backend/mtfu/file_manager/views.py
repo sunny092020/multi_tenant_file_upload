@@ -83,12 +83,6 @@ class UploadView(APIView):
         if not resource_id:
             raise ValidationError("No resource id found")
 
-        # check resource_id not a integer
-        try:
-            int(resource_id)
-        except ValueError:
-            raise ValidationError("resource id not a integer")
-
     def _get_s3_client(self):
         return boto3.client(
             "s3",
