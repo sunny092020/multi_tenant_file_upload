@@ -252,7 +252,7 @@ def test_list_files(john_client, jimmy_client, tmp_file):
     response_files = response.data["files"]
 
     for file in response_files:
-        assert file["resource_id"] == 1
+        assert file["resource_id"] == "1"
 
     # verify POST list_files/
     response = john_client.post("/api/list_files")
