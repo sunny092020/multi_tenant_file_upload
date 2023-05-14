@@ -29,7 +29,7 @@ class UploadView(APIView):
         except ValidationError as e:
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-        s3_client = self._get_s3_client()
+        s3_client = get_s3_client()
         user = request.user
         file_location = f"{settings.ASSET_IMAGE_FOLDER}/{user.username}/{upload_file.name}"
 
@@ -82,14 +82,6 @@ class UploadView(APIView):
 
         if not resource_id:
             raise ValidationError("No resource id found")
-
-    def _get_s3_client(self):
-        return boto3.client(
-            "s3",
-            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-            region_name=settings.AWS_S3_REGION_NAME,
-        )
 
     def _upload_file_to_s3(self, upload_file, s3_client, file_location):
         s3_client.upload_fileobj(
@@ -182,6 +174,8 @@ class ListFilesView(APIView):
 
 
 def paginate_files(request, files):
+    s3_client = get_s3_client()
+
     if request.method == "POST":
         page_number = request.POST.get("page", 1)
         page_size = request.POST.get("page_size", 10)
@@ -213,8 +207,25 @@ def paginate_files(request, files):
                 "location": file.location,
                 "expire_at": file.expire_at,
                 "is_public": file.is_public,
+                "url": s3_client.generate_presigned_url(
+                    "get_object",
+                    Params={
+                        "Bucket": settings.AWS_STORAGE_BUCKET_NAME,
+                        "Key": file.location,
+                    },
+                    ExpiresIn=settings.AWS_S3_PRESIGNED_URLS_EXPIRE,
+                ),
             }
             for file in file_list
         ],
     }
     return data
+
+
+def get_s3_client():
+    return boto3.client(
+        "s3",
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+        region_name=settings.AWS_S3_REGION_NAME,
+    )
