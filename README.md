@@ -1,6 +1,7 @@
 # multi_tenant_file_upload
 
-The purpose of this API is to allow multiple tenants to upload files to their respective accounts and link those files to specific resources and resource IDs. The API should support file upload, retrieval, deletion, listing, and filtering. The API is built using Django and PostgreSQL, and is deployed on EC2, with HTTPS provided by AWS API Gateway.
+The purpose of this API is to allow multiple tenants to upload files to their respective accounts and link those files to specific resources and resource IDs.  
+The API should support file upload, retrieval, deletion, listing, and filtering. The API is built using Django and PostgreSQL, and is deployed on EC2, with HTTPS provided by AWS API Gateway.
 
 ## steps how to provision the api
 
@@ -51,7 +52,11 @@ start django api
 ./scripts/start.sh
 ```
 
-create an AWS api gateway, which serves https from client and route request to our EC2 instance
+create an AWS api gateway, which serves https from client and route request to our EC2 instance  
+Please setup securiry group of EC2 instance to allow incomming trafic from outside on port 8000
+so the API gateway can connect on that port
+
+
 You can use curl to test the API, refer to file 
 ```
 multi_tenant_file_upload/scripts/test_deployment.sh
@@ -59,11 +64,11 @@ multi_tenant_file_upload/scripts/test_deployment.sh
 
 ## Design decisions:
 
-Framework and tools:
+Framework and tools:  
 use Django because it is mature with security built-in, has many good features. The ORM is good to handle complex database scheme with many tables and relations. Query is very convinion
 PostgreSQL for database is very reliable and can store files metadata well
 
-Backend process deployment on EC2 t3a.micro is cost-effective
+Backend process deployment on EC2 t3a.micro is cost-effective  
 AWS API Gateway can expose a https connection to client and route request to EC2 instance. It is also simple to deploy
 
 Database schema: I designed a simple database schema with two tables: 
