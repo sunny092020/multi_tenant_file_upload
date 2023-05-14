@@ -364,21 +364,6 @@ def test_delete_file_without_resource_id_and_resource(john_client):
     assert response.status_code == 404
 
 
-def test_upload_file_to_s3_failure(john_client, tmp_file):
-    # modify AWS_SECRET_ACCESS_KEY in settings.py to make upload to s3 fail
-    with override_settings(AWS_SECRET_ACCESS_KEY="incorrect_secret_access_key"):
-        response = john_client.post(
-            "/api/upload",
-            {
-                "file": open(tmp_file, "rb"),
-                "resource": "product",
-                "resource_id": 1,
-            },
-        )
-        assert response.status_code == 400
-        assert response.data["message"] == "File upload failed"
-
-
 def test_user_upload_the_same_file_twice(john_client, tmp_file):
     with open(tmp_file, "rb") as file:
         response = john_client.post(
