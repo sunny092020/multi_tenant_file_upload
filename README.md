@@ -38,6 +38,8 @@ create some tenants to start manual testing, from john1 to john10
 ./script/init_data.sh
 ```
 
+create a S3 bucket
+
 define environment parameters in docker-compose.yml
 ```
 - AWS_ACCESS_KEY_ID=<PLEASE_INPUT>
@@ -191,12 +193,14 @@ resource_id: `the ID of the resource associated with the file`
 HTTP 200 OK: `the file was uploaded successfully`  
 HTTP 400 Bad Request: `the request was malformed or the file upload failed`  
 ## Get Files
-`GET /files/{resource}/{resourceId}`  
+`GET /files/{resource}/{resourceId}?page={page}&page_size={page_size}`  
 Gets all files associated with a given resource and resource ID, which belong to the user making request
 
 ### Request Parameters
 resource: `the resource associated with the files`  
 resourceId: `the ID of the resource associated with the files`  
+page: `page number`  
+page_size: `page size`
 ### Response
 HTTP 200 OK: `a list of files associated with the resource and resource ID`  
 HTTP 400 Bad Request: `the request was malformed or the files could not be retrieved`  
@@ -218,6 +222,8 @@ Gets all files associated with a specified tenant, resource, or resource ID.
 tenant_username (optional): `the username of the tenant associated with the files`  
 resource (optional): `the resource associated with the files`  
 resource_id (optional): `the ID of the resource associated with the files`  
+page: `page number`  
+page_size: `page size`  
 ### Response
 HTTP 200 OK: `a list of files associated with the specified parameters`  
 HTTP 400 Bad Request: `the request was malformed or the files could not be retrieved`  
