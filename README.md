@@ -73,6 +73,55 @@ http://<YOUR_EC2_PUBLIC_DNS>:8000/{proxy}
 Please setup securiry group of EC2 instance to allow incomming trafic from outside on port 8000
 so the API gateway can connect on that port
 
+# REST API Specification
+This REST API is implemented in Django using the Django REST Framework.
+
+## Upload File
+`POST /upload`  
+Uploads a file to Amazon S3 and creates a corresponding File object in the database.
+
+### Request Parameters
+file: `the file to be uploaded (multipart/form-data)`  
+resource: `the resource associated with the file`  
+resource_id: `the ID of the resource associated with the file`  
+### Response
+HTTP 200 OK: `the file was uploaded successfully`  
+HTTP 400 Bad Request: `the request was malformed or the file upload failed`  
+## Get Files
+`GET /files/{resource}/{resourceId}?page={page}&page_size={page_size}`  
+Gets all files associated with a given resource and resource ID, which belong to the user making request
+
+### Request Parameters
+resource: `the resource associated with the files`  
+resourceId: `the ID of the resource associated with the files`  
+page (optional): `page number`  
+page_size (optional): `page size`
+### Response
+HTTP 200 OK: `a list of files associated with the resource and resource ID`  
+HTTP 400 Bad Request: `the request was malformed or the files could not be retrieved`  
+## Delete File
+`DELETE /files/{resource}/{resourceId}`  
+Deletes all files associated with a given resource and resource ID, which belong to the user making request
+
+### Request Parameters
+resource: `the resource associated with the files`  
+resourceId: `the ID of the resource associated with the files`  
+### Response
+HTTP 200 OK: `the files were deleted successfully`  
+HTTP 400 Bad Request: `the request was malformed or the files could not be deleted`  
+## List Files
+`POST /list_files`  
+Gets all files associated with a specified tenant, resource, or resource ID.
+
+### Request Parameters
+tenant_username (optional): `the username of the tenant associated with the files`  
+resource (optional): `the resource associated with the files`  
+resource_id (optional): `the ID of the resource associated with the files`  
+page (optional): `page number`  
+page_size (optional): `page size`  
+### Response
+HTTP 200 OK: `a list of files associated with the specified parameters`  
+HTTP 400 Bad Request: `the request was malformed or the files could not be retrieved`  
 
 You can use curl to test the API, below is some examples:  
 
@@ -177,53 +226,3 @@ Authentication and authorization: using JWT which is a popular standdard and can
 Pagination: using Django Paginator module for pagination, which allows users to retrieve a subset of uploaded files based on a specified page number and size.
 
 Connection to S3: use Boto3 library, which is the official library of AWS, so i think it is OK
-
-# REST API Specification
-This REST API is implemented in Django using the Django REST Framework.
-
-## Upload File
-`POST /upload`  
-Uploads a file to Amazon S3 and creates a corresponding File object in the database.
-
-### Request Parameters
-file: `the file to be uploaded (multipart/form-data)`  
-resource: `the resource associated with the file`  
-resource_id: `the ID of the resource associated with the file`  
-### Response
-HTTP 200 OK: `the file was uploaded successfully`  
-HTTP 400 Bad Request: `the request was malformed or the file upload failed`  
-## Get Files
-`GET /files/{resource}/{resourceId}?page={page}&page_size={page_size}`  
-Gets all files associated with a given resource and resource ID, which belong to the user making request
-
-### Request Parameters
-resource: `the resource associated with the files`  
-resourceId: `the ID of the resource associated with the files`  
-page (optional): `page number`  
-page_size (optional): `page size`
-### Response
-HTTP 200 OK: `a list of files associated with the resource and resource ID`  
-HTTP 400 Bad Request: `the request was malformed or the files could not be retrieved`  
-## Delete File
-`DELETE /files/{resource}/{resourceId}`  
-Deletes all files associated with a given resource and resource ID, which belong to the user making request
-
-### Request Parameters
-resource: `the resource associated with the files`  
-resourceId: `the ID of the resource associated with the files`  
-### Response
-HTTP 200 OK: `the files were deleted successfully`  
-HTTP 400 Bad Request: `the request was malformed or the files could not be deleted`  
-## List Files
-`POST /list_files`  
-Gets all files associated with a specified tenant, resource, or resource ID.
-
-### Request Parameters
-tenant_username (optional): `the username of the tenant associated with the files`  
-resource (optional): `the resource associated with the files`  
-resource_id (optional): `the ID of the resource associated with the files`  
-page (optional): `page number`  
-page_size (optional): `page size`  
-### Response
-HTTP 200 OK: `a list of files associated with the specified parameters`  
-HTTP 400 Bad Request: `the request was malformed or the files could not be retrieved`  
