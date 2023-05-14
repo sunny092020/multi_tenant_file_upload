@@ -72,9 +72,58 @@ Please setup securiry group of EC2 instance to allow incomming trafic from outsi
 so the API gateway can connect on that port
 
 
-You can use curl to test the API, refer to file 
+You can use curl to test the API, below is some examples:  
+
+get your jwt token as john1
 ```
-multi_tenant_file_upload/scripts/test_deployment.sh
+curl --location --request POST '<API_ENDPOINT>/api/token/' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "username": "john1",
+    "password": "test"
+}'
+```
+the response in the form of
+{"refresh":"<REFRESH_TOKEN>","access":"<ACCESS_TOKEN>"}
+
+you need to take the <ACCESS_TOKEN>
+
+use the token to upload a file on behalf of john1
+```
+curl --location --request POST '<API_ENDPOINT>/api/upload' \
+--header 'Authorization: Bearer <ACCESS_TOKEN>' \
+--form 'file=@my_file' \
+--form 'resource=product' \
+--form 'resource_id=1'
+
+curl --location --request POST '<API_ENDPOINT>/api/upload' --header 'Authorization: Bearer <ACCESS_TOKEN>' \
+--form 'file=@my_file' \
+--form 'resource=avatar' \
+--form 'resource_id=1'
+
+curl --location --request GET '<API_ENDPOINT>/api/files/product/1' --header 'Authorization: Bearer <ACCESS_TOKEN>'
+
+curl --location --request GET '<API_ENDPOINT>/api/files/product/10' --header 'Authorization: Bearer <ACCESS_TOKEN>'
+
+curl --location --request GET '<API_ENDPOINT>/api/files/product/2' --header 'Authorization: Bearer <ACCESS_TOKEN>'
+
+curl --location --request GET '<API_ENDPOINT>/api/files/avatar/1' --header 'Authorization: Bearer <ACCESS_TOKEN>'
+
+curl --location --request GET '<API_ENDPOINT>/api/files/2' --header 'Authorization: Bearer <ACCESS_TOKEN>'
+```
+
+get your jwt token as john2
+```
+curl --location --request POST '<API_ENDPOINT>/api/token/' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "username": "john2",
+    "password": "test"
+}'
+```
+use the token to list files on behalf of john2
+```
+curl --location --request GET '<API_ENDPOINT>/api/files/product/1' --header 'Authorization: Bearer <ACCESS_TOKEN>'
 ```
 
 ## Design decisions:
