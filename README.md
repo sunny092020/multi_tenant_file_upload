@@ -100,7 +100,10 @@ curl --location --request POST '<API_ENDPOINT>/api/upload' --header 'Authorizati
 --form 'file=@my_file' \
 --form 'resource=avatar' \
 --form 'resource_id=1'
+```
 
+You can also retrieve files of yourself 
+```
 curl --location --request GET '<API_ENDPOINT>/api/files/product/1' --header 'Authorization: Bearer <ACCESS_TOKEN>'
 
 curl --location --request GET '<API_ENDPOINT>/api/files/product/10' --header 'Authorization: Bearer <ACCESS_TOKEN>'
@@ -110,6 +113,20 @@ curl --location --request GET '<API_ENDPOINT>/api/files/product/2' --header 'Aut
 curl --location --request GET '<API_ENDPOINT>/api/files/avatar/1' --header 'Authorization: Bearer <ACCESS_TOKEN>'
 
 curl --location --request GET '<API_ENDPOINT>/api/files/2' --header 'Authorization: Bearer <ACCESS_TOKEN>'
+```
+
+You can also retrieve files by pagination
+```
+curl --location --request GET '<API_ENDPOINT>/api/files/product/1?page=2&page_size=5' --header 'Authorization: Bearer <ACCESS_TOKEN>'
+```
+
+You can also list files by pagination
+```
+curl --location --request POST '<API_ENDPOINT>/api/list_files' --header 'Authorization: Bearer <ACCESS_TOKEN>' \
+--form 'resource=avatar' \
+--form 'resource_id=1' \
+--form 'page=1' \
+--form 'page_size=3'
 ```
 
 get your jwt token as john2
