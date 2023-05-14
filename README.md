@@ -199,8 +199,8 @@ Gets all files associated with a given resource and resource ID, which belong to
 ### Request Parameters
 resource: `the resource associated with the files`  
 resourceId: `the ID of the resource associated with the files`  
-page: `page number`  
-page_size: `page size`
+page (optional): `page number`  
+page_size (optional): `page size`
 ### Response
 HTTP 200 OK: `a list of files associated with the resource and resource ID`  
 HTTP 400 Bad Request: `the request was malformed or the files could not be retrieved`  
@@ -222,8 +222,8 @@ Gets all files associated with a specified tenant, resource, or resource ID.
 tenant_username (optional): `the username of the tenant associated with the files`  
 resource (optional): `the resource associated with the files`  
 resource_id (optional): `the ID of the resource associated with the files`  
-page: `page number`  
-page_size: `page size`  
+page (optional): `page number`  
+page_size (optional): `page size`  
 ### Response
 HTTP 200 OK: `a list of files associated with the specified parameters`  
 HTTP 400 Bad Request: `the request was malformed or the files could not be retrieved`  
