@@ -53,6 +53,21 @@ start django api
 ```
 
 create an AWS api gateway, which serves https from client and route request to our EC2 instance  
+-Login to your AWS account  
+-Move to API gateway service page  
+-Click on "Create API" button  
+-In "HTTP API" section, click "Build"  
+-Click "Add integration"  
+-In "Integrations" dropdown, choose HTTP  
+-In "URL endpoint", input url endpoint of django deployed in EC2, for example:  
+http://<YOUR_EC2_PUBLIC_DNS>:8000  
+-Input your "API name", for example: mtfu  
+-Click "Next"  
+-In "Configure routes" page, In "Resource path", input "/{proxy}"  
+-Click "Next", and "Next"  
+-Click "Create"  
+-Now you see your api endpoint in "Invoke URL"  
+
 Please setup securiry group of EC2 instance to allow incomming trafic from outside on port 8000
 so the API gateway can connect on that port
 
