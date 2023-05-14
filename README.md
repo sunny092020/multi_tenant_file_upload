@@ -74,7 +74,6 @@ Please setup securiry group of EC2 instance to allow incomming trafic from outsi
 so the API gateway can connect on that port
 
 # REST API Specification
-This REST API is implemented in Django using the Django REST Framework.
 
 ## Upload File
 `POST /upload`  
