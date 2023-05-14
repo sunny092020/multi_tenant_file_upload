@@ -63,7 +63,7 @@ create an AWS api gateway, which serves https from client and route request to o
 http://<YOUR_EC2_PUBLIC_DNS>:8000  
 -Input your "API name", for example: mtfu  
 -Click "Next"  
--In "Configure routes" page, In "Resource path", input "/{proxy}"  
+-In "Configure routes" page, In "Resource path", input "/{proxy+}"  
 -Click "Next", and "Next"  
 -Click "Create"  
 -Now you see your api endpoint in "Invoke URL"  
