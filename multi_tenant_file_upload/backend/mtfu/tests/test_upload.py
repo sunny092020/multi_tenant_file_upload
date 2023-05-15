@@ -178,7 +178,7 @@ def test_delete_files_with_unauthorized_user():
 
 
 def test_list_files_with_unauthorized_user():
-    response = APIClient().post("/api/list_files")
+    response = APIClient().get("/api/list_files")
     assert response.status_code == 401
 
 
@@ -220,36 +220,36 @@ def test_list_files(john_client, jimmy_client, tmp_file):
             },
         )
 
-    # verify POST list_files/ by john
-    response = john_client.post("/api/list_files", {"tenant_username": "john"})
+    # verify GET list_files/ by john
+    response = john_client.get("/api/list_files", {"tenant_username": "john"})
     response_files = response.data["files"]
 
     for file in response_files:
         assert file["tenant"] == "john"
 
-    # verify POST list_files/ by jimmy
-    response = jimmy_client.post("/api/list_files", {"tenant_username": "jimmy"})
+    # verify GET list_files/ by jimmy
+    response = jimmy_client.get("/api/list_files", {"tenant_username": "jimmy"})
     response_files = response.data["files"]
 
     for file in response_files:
         assert file["tenant"] == "jimmy"
 
-    # verify POST list_files/ by resource product
-    response = john_client.post("/api/list_files", {"resource": "product"})
+    # verify GET list_files/ by resource product
+    response = john_client.get("/api/list_files", {"resource": "product"})
     response_files = response.data["files"]
 
     for file in response_files:
         assert file["resource"] == "product"
 
-    # verify POST list_files/ by resource avatar
-    response = john_client.post("/api/list_files", {"resource": "avatar"})
+    # verify GET list_files/ by resource avatar
+    response = john_client.get("/api/list_files", {"resource": "avatar"})
     response_files = response.data["files"]
 
     for file in response_files:
         assert file["resource"] == "avatar"
 
-    # verify POST list_files/ by resource product and tenant john
-    response = john_client.post(
+    # verify GET list_files/ by resource product and tenant john
+    response = john_client.get(
         "/api/list_files",
         {
             "resource": "product",
@@ -262,15 +262,15 @@ def test_list_files(john_client, jimmy_client, tmp_file):
         assert file["resource"] == "product"
         assert file["tenant"] == "john"
 
-    # verify POST list_files/ by resource id 1
-    response = john_client.post("/api/list_files", {"resource_id": 1})
+    # verify GET list_files/ by resource id 1
+    response = john_client.get("/api/list_files", {"resource_id": 1})
     response_files = response.data["files"]
 
     for file in response_files:
         assert file["resource_id"] == "1"
 
-    # verify POST list_files/
-    response = john_client.post("/api/list_files")
+    # verify GET list_files/
+    response = john_client.get("/api/list_files")
     response_files = response.data["files"]
 
     assert len(response_files) == 2
@@ -400,15 +400,15 @@ def test_pagination(john_client, tmp_file):
             )
             assert response.status_code == 200
 
-    response = john_client.post("/api/list_files", {"page": 1, "page_size": 3})
+    response = john_client.get("/api/list_files", {"page": 1, "page_size": 3})
     response_files = response.data["files"]
     assert len(response_files) == 3
 
-    response = john_client.post("/api/list_files", {"page": 2, "page_size": 5})
+    response = john_client.get("/api/list_files", {"page": 2, "page_size": 5})
     response_files = response.data["files"]
     assert len(response_files) == 5
 
-    response = john_client.post("/api/list_files", {"page": 4, "page_size": 3})
+    response = john_client.get("/api/list_files", {"page": 4, "page_size": 3})
     response_files = response.data["files"]
     assert len(response_files) == 1
 

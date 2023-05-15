@@ -109,7 +109,7 @@ resourceId: `the ID of the resource associated with the files`
 HTTP 200 OK: `the files were deleted successfully`  
 HTTP 400 Bad Request: `the request was malformed or the files could not be deleted`  
 ## List Files
-`POST /list_files`  
+`GET /list_files`  
 Gets all files associated with a specified tenant, resource, or resource ID.
 
 ### Request Parameters
@@ -172,11 +172,7 @@ curl --location --request GET '<API_ENDPOINT>/api/files/product/1?page=2&page_si
 
 You can also list files by pagination
 ```
-curl --location --request POST '<API_ENDPOINT>/api/list_files' --header 'Authorization: Bearer <ACCESS_TOKEN>' \
---form 'resource=avatar' \
---form 'resource_id=1' \
---form 'page=1' \
---form 'page_size=3'
+curl --location --request GET '<API_ENDPOINT>/api/list_files?resource=avatar&resource_id=1&page=1&page_size=3' --header 'Authorization: Bearer <ACCESS_TOKEN>'
 ```
 
 get your jwt token as john2

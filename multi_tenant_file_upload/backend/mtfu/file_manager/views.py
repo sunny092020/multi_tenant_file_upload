@@ -158,7 +158,7 @@ class ListFilesView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def post(self, request):
+    def get(self, request):
         # get user from session
         user = request.user
         files = File.objects.filter(
@@ -167,16 +167,16 @@ class ListFilesView(APIView):
             expire_at__gte=timezone.now(),
         )
 
-        if "tenant_username" in request.POST:
-            tenant_username = request.POST["tenant_username"]
+        tenant_username = request.GET.get('tenant_username', None)
+        if tenant_username is not None:
             files = files.filter(tenant__username=tenant_username)
 
-        if "resource" in request.POST:
-            resource = request.POST["resource"]
+        resource = request.GET.get('resource', None)
+        if resource is not None:
             files = files.filter(resource=resource)
 
-        if "resource_id" in request.POST:
-            resource_id = request.POST["resource_id"]
+        resource_id = request.GET.get('resource_id', None)
+        if resource_id is not None:
             files = files.filter(resource_id=resource_id)
 
         data = paginate_files(request, files)
