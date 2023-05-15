@@ -47,11 +47,8 @@ curl --location --request GET $FILES_ENDPOINT/avatar/1 \
   --header 'Authorization: Bearer '"$ACCESS_TOKEN"''
 
 # LIST_FILES_ENDPOINT
-curl --location --request POST $LIST_FILES_ENDPOINT \
-  --header 'Authorization: Bearer '"$ACCESS_TOKEN"'' \
-  --form 'username=john1' \
-  --form 'resource=avatar' \
-  --form 'resource_id=1'
+curl --location --request GET "$LIST_FILES_ENDPOINT?username=john1&resource=avatar&resource_id=1" \
+  --header 'Authorization: Bearer '"$ACCESS_TOKEN"''
 
 # Get the JWT token for john2
 USERNAME="john2"
