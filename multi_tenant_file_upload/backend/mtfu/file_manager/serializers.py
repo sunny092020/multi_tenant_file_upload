@@ -53,3 +53,31 @@ class FileSerializer(serializers.ModelSerializer):
 
     def get_tenant_username(self, obj):
         return obj.tenant.username
+
+
+class UploadSerializer(serializers.Serializer):
+    file = serializers.FileField(
+        required=True,
+        allow_empty_file=True,
+        error_messages={
+            "required": "No file was submitted.",
+        },
+    )
+    resource = serializers.CharField(
+        required=True,
+        error_messages={"required": "No resource found."},
+    )
+    resource_id = serializers.CharField(
+        required=True,
+        error_messages={"required": "No resource id found."},
+    )
+
+    def validate_file(self, value):
+        if not hasattr(value, "size"):
+            raise serializers.ValidationError("Invalid file")
+
+        if value.size > settings.MAX_FILE_SIZE:
+            raise serializers.ValidationError(
+                f"File size exceeds the maximum allowed size of {settings.MAX_FILE_SIZE} bytes"
+            )
+        return value

@@ -9,6 +9,7 @@ django.setup()
 from rest_framework.test import APIClient
 from mtfu.auth_user.models import Tenant
 from mtfu.file_manager.models import File
+from mtfu.tests.utils import get_content_from_response
 
 
 @pytest.fixture
@@ -293,6 +294,10 @@ def test_upload_file_bigger_than_10mb(john_client, bigger_than_10mb_file):
             },
         )
         assert response.status_code == 400
+        content = get_content_from_response(response)
+        assert content["file"] == [
+            "File size exceeds the maximum allowed size of 10485760 bytes",
+        ]
 
 
 def test_upload_without_file(john_client):
@@ -303,8 +308,10 @@ def test_upload_without_file(john_client):
             "resource_id": 1,
         },
     )
+
     assert response.status_code == 400
-    assert response.data["message"] == "['No file was submitted.']"
+    content = get_content_from_response(response)
+    assert content["file"] == ["No file was submitted."]
 
 
 def test_upload_without_resource(john_client, tmp_file):
@@ -317,7 +324,8 @@ def test_upload_without_resource(john_client, tmp_file):
             },
         )
         assert response.status_code == 400
-        assert response.data["message"] == "['No resource found']"
+        content = get_content_from_response(response)
+        assert content["resource"] == ["No resource found."]
 
 
 def test_upload_without_resource_id(john_client, tmp_file):
@@ -330,7 +338,8 @@ def test_upload_without_resource_id(john_client, tmp_file):
             },
         )
         assert response.status_code == 400
-        assert response.data["message"] == "['No resource id found']"
+        content = get_content_from_response(response)
+        assert content["resource_id"] == ["No resource id found."]
 
 
 def test_retrieve_file_without_resource_id(john_client):
@@ -383,6 +392,7 @@ def test_user_upload_the_same_file_twice(john_client, tmp_file):
                 "resource_id": 1,
             },
         )
+
         assert response.status_code == 200
 
 
@@ -422,7 +432,10 @@ def test_file_upload_invalid(john_client):
         },
     )
     assert response.status_code == 400
-    assert response.data["message"] == "['Invalid file']"
+    content = get_content_from_response(response)
+    assert content["file"] == [
+        "The submitted data was not a file. Check the encoding type on the form."
+    ]
 
 
 @pytest.fixture
