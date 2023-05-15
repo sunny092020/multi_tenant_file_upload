@@ -10,14 +10,15 @@ from botocore.exceptions import ClientError
 from mtfu.file_manager.models import File
 from dateutil.relativedelta import relativedelta
 from django.db import transaction
-from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Q
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from mtfu.file_manager.s3_utils import get_s3_client
+from mtfu.file_manager.pagination_utils import paginate_files
 import logging
 
 logger = logging.getLogger(__name__)
+
 
 class UploadView(APIView):
     authentication_classes = [JWTAuthentication]
@@ -124,7 +125,17 @@ class FileView(APIView):
             expire_at__gte=timezone.now(),
         )
 
-        data = paginate_files(request, files)
+        returned_fields = [
+            "tenant_username",
+            "resource",
+            "resource_id",
+            "name",
+            "location",
+            "expire_at",
+            "is_public",
+            "url",
+        ]
+        data = paginate_files(request, files, returned_fields)
         return Response(data)
 
     @transaction.atomic
@@ -171,50 +182,14 @@ class ListFilesView(APIView):
         if resource_id is not None:
             files = files.filter(resource_id=resource_id)
 
-        data = paginate_files(request, files)
+        returned_fields = [
+            "tenant_username",
+            "resource",
+            "resource_id",
+            "name",
+            "location",
+            "expire_at",
+            "is_public",
+        ]
+        data = paginate_files(request, files, returned_fields)
         return Response(data)
-
-
-def paginate_files(request, files):
-    s3_client = get_s3_client()
-
-    page_number = request.GET.get("page", 1)
-    page_size = request.GET.get("page_size", 10)
-
-    files = files.order_by("name")
-
-    paginator = Paginator(files, page_size)
-    try:
-        file_list = paginator.page(page_number)
-    except PageNotAnInteger:
-        file_list = paginator.page(1)
-    except EmptyPage:
-        file_list = paginator.page(paginator.num_pages)
-
-    # Return serialized data with pagination information
-    data = {
-        "count": paginator.count,
-        "num_pages": paginator.num_pages,
-        "page_range": list(paginator.page_range),
-        "files": [
-            {
-                "tenant": file.tenant.username,
-                "resource": file.resource,
-                "resource_id": file.resource_id,
-                "name": file.name,
-                "location": file.location,
-                "expire_at": file.expire_at,
-                "is_public": file.is_public,
-                "url": s3_client.generate_presigned_url(
-                    "get_object",
-                    Params={
-                        "Bucket": settings.AWS_STORAGE_BUCKET_NAME,
-                        "Key": file.location,
-                    },
-                    ExpiresIn=settings.AWS_S3_PRESIGNED_URLS_EXPIRE,
-                ),
-            }
-            for file in file_list
-        ],
-    }
-    return data

@@ -9,7 +9,6 @@ django.setup()
 from rest_framework.test import APIClient
 from mtfu.auth_user.models import Tenant
 from mtfu.file_manager.models import File
-from django.test import override_settings
 
 
 @pytest.fixture
@@ -225,14 +224,14 @@ def test_list_files(john_client, jimmy_client, tmp_file):
     response_files = response.data["files"]
 
     for file in response_files:
-        assert file["tenant"] == "john"
+        assert file["tenant_username"] == "john"
 
     # verify GET list_files/ by jimmy
     response = jimmy_client.get("/api/list_files", {"tenant_username": "jimmy"})
     response_files = response.data["files"]
 
     for file in response_files:
-        assert file["tenant"] == "jimmy"
+        assert file["tenant_username"] == "jimmy"
 
     # verify GET list_files/ by resource product
     response = john_client.get("/api/list_files", {"resource": "product"})
@@ -260,7 +259,7 @@ def test_list_files(john_client, jimmy_client, tmp_file):
 
     for file in response_files:
         assert file["resource"] == "product"
-        assert file["tenant"] == "john"
+        assert file["tenant_username"] == "john"
 
     # verify GET list_files/ by resource id 1
     response = john_client.get("/api/list_files", {"resource_id": 1})
