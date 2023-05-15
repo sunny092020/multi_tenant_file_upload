@@ -5,7 +5,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status
 
-import boto3
 from django.conf import settings
 from botocore.exceptions import ClientError
 from mtfu.file_manager.models import File
@@ -15,16 +14,7 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Q
 from django.utils import timezone
 from django.core.exceptions import ValidationError
-
-S3_SESSION = boto3.session.Session(
-    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-    region_name=settings.AWS_S3_REGION_NAME,
-)
-
-
-def get_s3_client():
-    return S3_SESSION.client("s3")
+from mtfu.file_manager.s3_utils import get_s3_client
 
 
 class UploadView(APIView):
@@ -167,15 +157,15 @@ class ListFilesView(APIView):
             expire_at__gte=timezone.now(),
         )
 
-        tenant_username = request.GET.get('tenant_username', None)
+        tenant_username = request.GET.get("tenant_username", None)
         if tenant_username is not None:
             files = files.filter(tenant__username=tenant_username)
 
-        resource = request.GET.get('resource', None)
+        resource = request.GET.get("resource", None)
         if resource is not None:
             files = files.filter(resource=resource)
 
-        resource_id = request.GET.get('resource_id', None)
+        resource_id = request.GET.get("resource_id", None)
         if resource_id is not None:
             files = files.filter(resource_id=resource_id)
 
