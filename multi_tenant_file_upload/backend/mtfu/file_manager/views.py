@@ -176,12 +176,8 @@ class ListFilesView(APIView):
 def paginate_files(request, files):
     s3_client = get_s3_client()
 
-    if request.method == "POST":
-        page_number = request.POST.get("page", 1)
-        page_size = request.POST.get("page_size", 10)
-    else:
-        page_number = request.GET.get("page", 1)
-        page_size = request.GET.get("page_size", 10)
+    page_number = request.GET.get("page", 1)
+    page_size = request.GET.get("page_size", 10)
 
     files = files.order_by("name")
 
